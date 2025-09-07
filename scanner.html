@@ -1,0 +1,47 @@
+<!doctype html>
+<html>
+<head>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>iPhone Scanner</title>
+</head>
+<body>
+  <h2>Simple Scanner</h2>
+  <video id="video" autoplay playsinline muted style="width:100%;background:#000;"></video>
+  <canvas id="canvas" style="display:none;"></canvas>
+  <img id="preview" style="width:100%;display:none;"/>
+  <br>
+  <button id="startBtn">Start Camera</button>
+  <button id="snapBtn">Capture</button>
+  <button id="savePdfBtn">Save as PDF</button>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script>
+    const video=document.getElementById('video');
+    const canvas=document.getElementById('canvas');
+    const preview=document.getElementById('preview');
+
+    document.getElementById('startBtn').onclick=async()=>{
+      const stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:"environment"}});
+      video.srcObject=stream;
+    };
+
+    document.getElementById('snapBtn').onclick=()=>{
+      canvas.width=video.videoWidth;
+      canvas.height=video.videoHeight;
+      canvas.getContext('2d').drawImage(video,0,0);
+      const img=canvas.toDataURL("image/jpeg",0.9);
+      preview.src=img;
+      preview.style.display='block';
+      preview.dataset.img=img;
+    };
+
+    document.getElementById('savePdfBtn').onclick=()=>{
+      if(!preview.dataset.img){alert("Take a photo first");return;}
+      const {jsPDF}=window.jspdf;
+      const pdf=new jsPDF("p","mm","a4");
+      pdf.addImage(preview.dataset.img,"JPEG",10,10,190,277);
+      pdf.save("scan.pdf");
+    };
+  </script>
+</body>
+</html>
